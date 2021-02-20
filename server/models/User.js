@@ -5,8 +5,8 @@ const User = new Schema({
   password: {type: String, required: true},
   diskSpace: {type: String, default: 1024**3*10},
   avatar: {type: String},
+  usedSpace: {type: Number, default: 0},
   files: [{type: ObjectId, ref: 'file'}]
-
 })
 
 module.exports = model('User', User)
