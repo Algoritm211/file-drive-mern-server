@@ -53,7 +53,6 @@ class FileController {
       if (user.usedSpace + file.size > user.diskSpace) {
         return response.status(400).json({message: 'You have not enough space on disk'})
       }
-
       user.usedSpace = user.usedSpace + file.size
 
       if (!parent) {
@@ -68,11 +67,18 @@ class FileController {
       }
       await file.mv(file.path)
 
+      let filePath
+      if (!parent) {
+        filePath = file.name
+      } else {
+        filePath = `${parent.path}/${file.name}`
+      }
+
       const newFile = new File({
         name: file.name,
         type: type,
         size: file.size,
-        path: parent?.path,
+        path: filePath,
         parent: parent?._id,
         user: user._id
       })
@@ -84,6 +90,37 @@ class FileController {
     } catch (error) {
       console.log(error)
       return response.status.json({message: 'File upload error'})
+    }
+  }
+
+  async downloadFile(request, response) {
+    try {
+
+      const file = await File.findOne({user: request.user.id, _id: request.query.id})
+
+      const path = `${config.get('rootFilesDir')}/${request.user.id}/${file.path}`
+
+      if (!fs.existsSync(path)) {
+        return response.status(400).json({message: 'File is not exist'})
+      }
+
+      return response.download(path, file.name)
+
+    } catch (error) {
+      console.log(error)
+      return response.status(500).json({message: 'File download error'})
+    }
+  }
+
+  async deleteFile(request, response) {
+    try {
+      const file = await File.findOne({_id: request.query.id})
+      await FileService.deleteFile(file)
+      await file.remove()
+      response.status(200).json({id: file._id})
+    } catch (error) {
+      console.log(error)
+      return response.status(500).json({message: 'File delete error'})
     }
   }
 }
