@@ -33,7 +33,22 @@ class FileController {
 
   async getFiles(request, response) {
     try {
-      const files = await File.find({user: request.user.id, parent: request.query.parent})
+      const sortType = request.query.sort
+
+      let files
+      switch (sortType) {
+        case 'size':
+          files = await File.find({user: request.user.id, parent: request.query.parent}).sort({size: 1})
+          break
+        case 'name':
+          files = await File.find({user: request.user.id, parent: request.query.parent}).sort({name: 1})
+          break
+        case 'date':
+          files = await File.find({user: request.user.id, parent: request.query.parent}).sort({date: 1})
+          break
+        default:
+          files = await File.find({user: request.user.id, parent: request.query.parent})
+      }
 
       return response.json(files)
 
