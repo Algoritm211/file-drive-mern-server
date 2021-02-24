@@ -138,6 +138,20 @@ class FileController {
       return response.status(500).json({message: 'File delete error'})
     }
   }
+
+  async searchFile(request, response) {
+    try {
+      const searchString = request.query.search
+
+      const allUsersFiles = await File.find({user: request.user.id})
+      const searchFiles = allUsersFiles.filter(file => file.name.includes(searchString))
+
+      return response.status(200).json(searchFiles)
+    } catch (error) {
+      console.log(error)
+      return response.status(500).json({message: 'An error occurred in file search'})
+    }
+  }
 }
 
 module.exports = new FileController()
