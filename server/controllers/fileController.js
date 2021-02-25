@@ -152,6 +152,42 @@ class FileController {
       return response.status(500).json({message: 'An error occurred in file search'})
     }
   }
+
+  async uploadAvatar(request, response) {
+    try {
+      const file = request.files.file
+      const user = await User.findById(request.user.id)
+
+      const avatarName = Date.now() + file.name
+      const avatarPath = `${config.get('staticDir')}/${avatarName}`
+
+      file.mv(avatarPath)
+
+      user.avatar = avatarName
+      await user.save()
+
+      return response.status(200).json({avatarName: avatarName})
+    } catch (error) {
+      console.log(error)
+      return response.status(500).json({message: 'An error occurred during uploading avatar'})
+    }
+  }
+
+  async deleteAvatar(request, response) {
+    try {
+      const user = await User.findById(request.user.id)
+
+      fs.unlinkSync(`${config.get('staticDir')}/${user.avatar}`)
+      user.avatar = null
+      await user.save()
+
+      return response.status(200).json(user)
+    } catch (error) {
+      console.log(error)
+      return response.status(500).json({message: 'Error during delete file'})
+    }
+
+  }
 }
 
 module.exports = new FileController()
