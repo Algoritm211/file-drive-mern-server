@@ -15,10 +15,10 @@ class FileController {
 
       if (!fileParent) {
         file.path = name
-        await FileService.createDir(file)
+        await FileService.createDir(request, file)
       } else {
         file.path = `${fileParent.path}/${name}`
-        await FileService.createDir(file)
+        await FileService.createDir(request, file)
         fileParent.children.push(file._id)
         await fileParent.save()
       }
@@ -71,9 +71,9 @@ class FileController {
       user.usedSpace = user.usedSpace + file.size
 
       if (!parent) {
-        file.path = `${config.get('rootFilesDir')}/${user._id}/${file.name}`
+        file.path = `${request.filePath}/${user._id}/${file.name}`
       } else {
-        file.path = `${config.get('rootFilesDir')}/${user._id}/${parent.path}/${file.name}`
+        file.path = `${request.filePath}/${user._id}/${parent.path}/${file.name}`
       }
       const type = file.name.split('.').pop()
 
@@ -113,7 +113,7 @@ class FileController {
 
       const file = await File.findOne({user: request.user.id, _id: request.query.id})
 
-      const path = `${config.get('rootFilesDir')}/${request.user.id}/${file.path}`
+      const path = `${request.filePath}/${request.user.id}/${file.path}`
 
       if (!fs.existsSync(path)) {
         return response.status(400).json({message: 'File is not exist'})
@@ -130,7 +130,7 @@ class FileController {
   async deleteFile(request, response) {
     try {
       const file = await File.findOne({_id: request.query.id})
-      await FileService.deleteFile(file)
+      await FileService.deleteFile(request, file)
       await file.remove()
       response.status(200).json({id: file._id})
     } catch (error) {
