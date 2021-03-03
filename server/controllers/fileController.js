@@ -159,10 +159,10 @@ class FileController {
       const user = await User.findById(request.user.id)
 
       const avatarName = Date.now() + file.name
-      const avatarPath = `${config.get('staticDir')}/${avatarName}`
+      const avatarPath = `${request.staticPath}/${avatarName}`
 
-      file.mv(avatarPath)
-
+      await file.mv(avatarPath)
+      console.log('AVAPATH', avatarPath)
       user.avatar = avatarName
       await user.save()
 
@@ -177,7 +177,7 @@ class FileController {
     try {
       const user = await User.findById(request.user.id)
 
-      fs.unlinkSync(`${config.get('staticDir')}/${user.avatar}`)
+      fs.unlinkSync(`${request.staticPath}/${user.avatar}`)
       user.avatar = null
       await user.save()
 
@@ -186,7 +186,6 @@ class FileController {
       console.log(error)
       return response.status(500).json({message: 'Error during delete file'})
     }
-
   }
 }
 

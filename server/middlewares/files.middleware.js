@@ -8,5 +8,6 @@ module.exports = function fileMiddleware(path) {
     } catch (e) {
       console.log(e)
     }
+
   }
 }

@@ -14,7 +14,7 @@ module.exports = (request, response, next) => {
       return response.status(401).json({message: "Auth error"})
     }
 
-    const decodedUserId = JWT.verify(token, config.get('secretKey'))
+    let decodedUserId = JWT.verify(token, config.get('secretKey'))
 
     request.user = decodedUserId
     next()
